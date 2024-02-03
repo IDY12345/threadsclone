@@ -29,7 +29,7 @@ const communitySchema=new mongoose.Schema({
     members:[
         {
             type:mongoose.Schema.Types.ObjectId,
-            ref:'USer'
+            ref:'User'
         }
     ]
 })
