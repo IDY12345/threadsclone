@@ -1,10 +1,11 @@
 import React from 'react'
-import { currentUser } from '@clerk/nextjs'
+import { currentUser } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
 import {fetchUser, getActivity } from '@/lib/actions/user.actions'
 import Image from 'next/image'
 import Link from 'next/link'
 
+export const dynamic = 'force-dynamic'
 
 const page = async () => {
 

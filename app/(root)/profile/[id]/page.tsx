@@ -1,5 +1,5 @@
 import React from 'react'
-import { currentUser } from '@clerk/nextjs'
+import { currentUser } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
 import { fetchUser } from '@/lib/actions/user.actions'
 import ProfileHeader from '@/components/shared/ProfileHeader'
@@ -8,13 +8,16 @@ import { profileTabs } from '@/constants'
 import Image from 'next/image'
 import ThreadsTab from '@/components/shared/ThreadsTab'
 
-const page = async ({ params }: { params: { id: string } }) => {
+export const dynamic = 'force-dynamic'
+const page = async ({ params }: { params: Promise<{ id: string }> }) => {
+
+    const { id } = await params;
 
     const user = await currentUser()
 
     if (!user) return null;
 
-    const userInfo = await fetchUser(params.id);
+    const userInfo = await fetchUser(id);
 
     if (!userInfo?.onboarded) redirect('/onboarding');
 

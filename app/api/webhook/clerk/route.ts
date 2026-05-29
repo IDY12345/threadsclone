@@ -35,8 +35,8 @@ type Event = {
 };
 
 export const POST = async (request: Request) => {
-  const payload = await request.json();
-  const header = headers();
+  const payload = await request.text();
+  const header = await headers();
 
   const heads = {
     "svix-id": header.get("svix-id"),
@@ -46,17 +46,33 @@ export const POST = async (request: Request) => {
 
   // Activitate Webhook in the Clerk Dashboard.
   // After adding the endpoint, you'll see the secret on the right side.
-  const wh = new Webhook(process.env.NEXT_CLERK_WEBHOOK_SECRET || "");
+  const webhookSecret =
+    process.env.CLERK_WEBHOOK_SECRET ||
+    process.env.NEXT_CLERK_WEBHOOK_SECRET ||
+    "";
+
+  if (!webhookSecret) {
+    return NextResponse.json(
+      { message: "Missing Clerk webhook secret" },
+      { status: 500 }
+    );
+  }
+
+  const wh = new Webhook(webhookSecret);
 
   let evnt: Event | null = null;
 
   try {
     evnt = wh.verify(
-      JSON.stringify(payload),
+      payload,
       heads as IncomingHttpHeaders & WebhookRequiredHeaders
     ) as Event;
   } catch (err) {
-    return NextResponse.json({ message: err }, { status: 400 });
+    console.error("Clerk webhook verification failed", err);
+    return NextResponse.json(
+      { message: "Invalid webhook signature" },
+      { status: 400 }
+    );
   }
 
   const eventType: EventType = evnt?.type!;

@@ -1,5 +1,5 @@
 import React from 'react'
-import { currentUser } from '@clerk/nextjs'
+import { currentUser } from '@clerk/nextjs/server'
 import ProfileHeader from '@/components/shared/ProfileHeader'
 import { Tabs, TabsList,TabsContent,TabsTrigger } from '@/components/ui/tabs'
 import { communityTabs } from '@/constants'
@@ -8,13 +8,16 @@ import ThreadsTab from '@/components/shared/ThreadsTab'
 import { fetchCommunityDetails } from '@/lib/actions/community.actions'
 import UserCard from '@/components/cards/UserCard'
 
-const page = async ({ params }: { params: { id: string } }) => {
+export const dynamic = 'force-dynamic'
+const page = async ({ params }: { params: Promise<{ id: string }> }) => {
+
+    const { id } = await params;
 
     const user = await currentUser()
 
     if (!user) return null;
 
-    const communityDetails=await fetchCommunityDetails(params.id)
+    const communityDetails=await fetchCommunityDetails(id)
     return (
         <section>
             <ProfileHeader

@@ -2,13 +2,16 @@ import ThreadCard from '@/components/cards/ThreadCard'
 import Comment from '@/components/forms/Comment';
 import { fetchThreadById } from '@/lib/actions/thread.actions';
 import { fetchUser } from '@/lib/actions/user.actions';
-import { currentUser } from '@clerk/nextjs';
+import { currentUser } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
 import React from 'react'
 
-const page = async({ params }: { params: { id: string } }) => {
+export const dynamic = 'force-dynamic'
+const page = async({ params }: { params: Promise<{ id: string }> }) => {
 
-    if(!params.id) return null;
+    const { id } = await params;
+
+    if(!id) return null;
 
     const user=await currentUser();
 
@@ -18,7 +21,7 @@ const page = async({ params }: { params: { id: string } }) => {
 
     if(!userInfo?.onboarded) redirect('/onboarding')
 
-    const thread=await fetchThreadById(params.id)
+    const thread=await fetchThreadById(id)
 
     return (
         <section className='relative'>

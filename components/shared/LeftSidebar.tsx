@@ -3,27 +3,28 @@ import Link from 'next/link'
 import React from 'react'
 import { sidebarLinks } from '@/constants/index'
 import Image from 'next/image'
-import { usePathname, useRouter } from 'next/navigation'
-import { SignOutButton, SignedIn ,useAuth} from '@clerk/nextjs'
+import { usePathname } from 'next/navigation'
+import { SignOutButton, useAuth } from '@clerk/nextjs'
 
 const LeftSidebar = () => {
 
-  const router = useRouter()
   const pathname = usePathname()
 
-  const {userId}=useAuth()
+  const { userId, isLoaded } = useAuth()
   return (
     <section className='custom-scrollbar leftsidebar'>
       <div className='flex w-full flex-1 flex-col gap-6 px-6'>
         {
           sidebarLinks.map((link) => {
             const isActive = (pathname.includes(link.route) && link.route.length > 1) || pathname === link.route;
-
-            if(link.route === '/profile') link.route=`${link.route}/${userId}`
+            const linkRoute =
+              link.route === '/profile' && userId
+                ? `${link.route}/${userId}`
+                : link.route;
 
             return (
               <Link
-                href={link.route}
+                href={linkRoute}
                 key={link.label}
                 className={`leftsidebar_link ${isActive && 'bg-primary-500'}`}
               >
@@ -40,14 +41,14 @@ const LeftSidebar = () => {
         }
       </div>
       <div className='mt-10 px-6'>
-        <SignedIn>
-          <SignOutButton signOutCallback={()=>router.push('/sign-in')}>
+        {isLoaded && userId && (
+          <SignOutButton redirectUrl='/sign-in'>
             <div className='flex cursor-pointer gap-4 p-4'>
               <Image src={'/logout.svg'} alt='logout' width={24} height={24} />
               <p className='text-light-2 max-lg:hidden'>Logout</p>
             </div>
           </SignOutButton>
-        </SignedIn>
+        )}
       </div>
     </section>
   )

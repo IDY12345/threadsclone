@@ -1,5 +1,5 @@
 import React from 'react'
-import { currentUser } from '@clerk/nextjs'
+import { currentUser } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
 import {fetchUser, fetchUsers } from '@/lib/actions/user.actions'
 import Image from 'next/image'
@@ -7,6 +7,7 @@ import UserCard from '@/components/cards/UserCard'
 import { fetchCommunities } from '@/lib/actions/community.actions'
 import CommunityCard from '@/components/cards/CommunityCard'
 
+export const dynamic = 'force-dynamic'
 const page = async () => {
 
     const user = await currentUser()
