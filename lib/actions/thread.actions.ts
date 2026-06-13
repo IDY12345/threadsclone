@@ -2,14 +2,18 @@
 
 import { revalidatePath } from "next/cache";
 
-import { connecctedToDB } from "../mongoose";
+import { connectToDB } from "../mongoose";
 
 import User from "../models/user.model";
 import Thread from "../models/thread.model";
 import Community from "../models/community.model";
 
+function getErrorMessage(error: unknown) {
+  return error instanceof Error ? error.message : "Unknown error";
+}
+
 export async function fetchPosts(pageNumber = 1, pageSize = 20) {
-  await connecctedToDB();
+  await connectToDB();
 
   // Calculate the number of posts to skip based on the page number and page size.
   const skipAmount = (pageNumber - 1) * pageSize;
@@ -58,7 +62,7 @@ interface Params {
 export async function createThread({ text, author, communityId, path }: Params
 ) {
   try {
-    await connecctedToDB();
+    await connectToDB();
 
     const communityIdObject = await Community.findOne(
       { id: communityId },
@@ -84,15 +88,21 @@ export async function createThread({ text, author, communityId, path }: Params
     }
 
     revalidatePath(path);
-  } catch (error: any) {
-    throw new Error(`Failed to create thread: ${error.message}`);
+  } catch (error: unknown) {
+    throw new Error(`Failed to create thread: ${getErrorMessage(error)}`);
   }
 }
 
-async function fetchAllChildThreads(threadId: string): Promise<any[]> {
+interface ThreadDescendant {
+  _id: string;
+  author?: { _id?: { toString(): string } };
+  community?: { _id?: { toString(): string } };
+}
+
+async function fetchAllChildThreads(threadId: string): Promise<ThreadDescendant[]> {
   const childThreads = await Thread.find({ parentId: threadId });
 
-  const descendantThreads = [];
+  const descendantThreads: ThreadDescendant[] = [];
   for (const childThread of childThreads) {
     const descendants = await fetchAllChildThreads(childThread._id);
     descendantThreads.push(childThread, ...descendants);
@@ -103,7 +113,7 @@ async function fetchAllChildThreads(threadId: string): Promise<any[]> {
 
 export async function deleteThread(id: string, path: string): Promise<void> {
   try {
-    await connecctedToDB();
+    await connectToDB();
 
     // Find the thread to be deleted (the main thread)
     const mainThread = await Thread.findById(id).populate("author community");
@@ -152,13 +162,13 @@ export async function deleteThread(id: string, path: string): Promise<void> {
     );
 
     revalidatePath(path);
-  } catch (error: any) {
-    throw new Error(`Failed to delete thread: ${error.message}`);
+  } catch (error: unknown) {
+    throw new Error(`Failed to delete thread: ${getErrorMessage(error)}`);
   }
 }
 
 export async function fetchThreadById(threadId: string) {
-  await connecctedToDB();
+  await connectToDB();
 
   try {
     const thread = await Thread.findById(threadId)
@@ -206,7 +216,7 @@ export async function addCommentToThread(
   userId: string,
   path: string
 ) {
-  await connecctedToDB();
+  await connectToDB();
 
   try {
     // Find the original thread by its ID

@@ -6,7 +6,7 @@ import Community from "../models/community.model";
 import Thread from "../models/thread.model";
 import User from "../models/user.model";
 
-import { connecctedToDB } from "../mongoose";
+import { connectToDB } from "../mongoose";
 
 export async function createCommunity(
   id: string,
@@ -17,7 +17,7 @@ export async function createCommunity(
   createdById: string // Change the parameter name to reflect it's an id
 ) {
   try {
-    await connecctedToDB();
+    await connectToDB();
 
     // Find the user with the provided unique id
     const user = await User.findOne({ id: createdById });
@@ -51,7 +51,7 @@ export async function createCommunity(
 
 export async function fetchCommunityDetails(id: string) {
   try {
-    await connecctedToDB();
+    await connectToDB();
 
     const communityDetails = await Community.findOne({ id }).populate([
       "createdBy",
@@ -72,7 +72,7 @@ export async function fetchCommunityDetails(id: string) {
 
 export async function fetchCommunityPosts(id: string) {
   try {
-    await connecctedToDB();
+    await connectToDB();
 
     const communityPosts = await Community.findById(id).populate({
       path: "threads",
@@ -82,6 +82,11 @@ export async function fetchCommunityPosts(id: string) {
           path: "author",
           model: User,
           select: "name image id", // Select the "name" and "_id" fields from the "User" model
+        },
+        {
+          path: "community",
+          model: Community,
+          select: "id name image", // string `id` (not the raw ObjectId) so it serializes to the client
         },
         {
           path: "children",
@@ -115,7 +120,7 @@ export async function fetchCommunities({
   sortBy?: SortOrder;
 }) {
   try {
-    await connecctedToDB();
+    await connectToDB();
 
     // Calculate the number of communities to skip based on the page number and page size.
     const skipAmount = (pageNumber - 1) * pageSize;
@@ -164,7 +169,7 @@ export async function addMemberToCommunity(
   memberId: string
 ) {
   try {
-    await connecctedToDB();
+    await connectToDB();
 
     // Find the community by its unique id
     const community = await Community.findOne({ id: communityId });
@@ -206,7 +211,7 @@ export async function removeUserFromCommunity(
   communityId: string
 ) {
   try {
-    await connecctedToDB();
+    await connectToDB();
 
     const userIdObject = await User.findOne({ id: userId }, { _id: 1 });
     const communityIdObject = await Community.findOne(
@@ -249,7 +254,7 @@ export async function updateCommunityInfo(
   image: string
 ) {
   try {
-    await connecctedToDB();
+    await connectToDB();
 
     // Find the community by its _id and update the information
     const updatedCommunity = await Community.findOneAndUpdate(
@@ -271,7 +276,7 @@ export async function updateCommunityInfo(
 
 export async function deleteCommunity(communityId: string) {
   try {
-    await connecctedToDB();
+    await connectToDB();
 
     // Find the community by its ID and delete it
     const deletedCommunity = await Community.findOneAndDelete({

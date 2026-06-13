@@ -7,18 +7,22 @@ import Community from "../models/community.model";
 import Thread from "../models/thread.model";
 import User from "../models/user.model";
 
-import { connecctedToDB } from "../mongoose";
+import { connectToDB } from "../mongoose";
+
+function getErrorMessage(error: unknown) {
+  return error instanceof Error ? error.message : "Unknown error";
+}
 
 export async function fetchUser(userId: string) {
   try {
-    await connecctedToDB();
+    await connectToDB();
 
     return await User.findOne({ id: userId }).populate({
       path: "communities",
       model: Community,
     });
-  } catch (error: any) {
-    throw new Error(`Failed to fetch user: ${error.message}`);
+  } catch (error: unknown) {
+    throw new Error(`Failed to fetch user: ${getErrorMessage(error)}`);
   }
 }
 
@@ -40,7 +44,7 @@ export async function updateUser({
   image,
 }: Params): Promise<void> {
   try {
-    await connecctedToDB();
+    await connectToDB();
 
     await User.findOneAndUpdate(
       { id: userId },
@@ -57,14 +61,14 @@ export async function updateUser({
     if (path === "/profile/edit") {
       revalidatePath(path);
     }
-  } catch (error: any) {
-    throw new Error(`Failed to create/update user: ${error.message}`);
+  } catch (error: unknown) {
+    throw new Error(`Failed to create/update user: ${getErrorMessage(error)}`);
   }
 }
 
 export async function fetchUserPosts(userId: string) {
   try {
-    await connecctedToDB();
+    await connectToDB();
 
     // Find all threads authored by the user with the given userId
     const threads = await User.findOne({ id: userId }).populate({
@@ -109,7 +113,7 @@ export async function fetchUsers({
   sortBy?: SortOrder;
 }) {
   try {
-    await connecctedToDB();
+    await connectToDB();
 
     // Calculate the number of users to skip based on the page number and page size.
     const skipAmount = (pageNumber - 1) * pageSize;
@@ -155,7 +159,7 @@ export async function fetchUsers({
 
 export async function getActivity(userId: string) {
   try {
-    await connecctedToDB();
+    await connectToDB();
 
     // Find all threads created by the user
     const userThreads = await Thread.find({ author: userId });

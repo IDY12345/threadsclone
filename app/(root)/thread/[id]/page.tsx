@@ -7,6 +7,25 @@ import { redirect } from 'next/navigation';
 import React from 'react'
 
 export const dynamic = 'force-dynamic'
+
+interface ThreadChild {
+    _id: string;
+    parentId?: string;
+    text: string;
+    author?: {
+        id?: string;
+        name?: string;
+        image?: string;
+    };
+    community?: {
+        id?: string;
+        name?: string;
+        image?: string;
+    } | null;
+    createdAt?: Date | string;
+    children?: unknown[];
+}
+
 const page = async({ params }: { params: Promise<{ id: string }> }) => {
 
     const { id } = await params;
@@ -28,14 +47,22 @@ const page = async({ params }: { params: Promise<{ id: string }> }) => {
             <div >
                 <ThreadCard
                     key={thread._id}
-                    id={thread._id}
+                    id={String(thread._id)}
                     currentUserId={user?.id || ""}
-                    parentId={thread.parentId}
+                    parentId={thread.parentId ? String(thread.parentId) : null}
                     content={thread.text}
-                    author={thread.author}
-                    community={thread.community}
-                    createdAt={thread.createdAt}
-                    comments={thread.children} />
+                    author={{
+                        name: thread.author?.name,
+                        image: thread.author?.image,
+                        id: thread.author?.id,
+                    }}
+                    community={thread.community && thread.community.name ? {
+                        id: String(thread.community.id ?? ''),
+                        name: thread.community.name,
+                        image: thread.community.image,
+                    } : null}
+                    createdAt={thread.createdAt?.toString()}
+                    commentCount={thread.children?.length ?? 0} />
             </div>
             <div className='mt-7'>
                 <Comment 
@@ -46,18 +73,26 @@ const page = async({ params }: { params: Promise<{ id: string }> }) => {
             </div>
 
             <div className='mt-10'>
-                {thread.children.map((childItem:any)=>
+                {thread.children.map((childItem: ThreadChild)=>
                 (
                     <ThreadCard
                     key={childItem._id}
-                    id={childItem._id}
+                    id={String(childItem._id)}
                     currentUserId={user?.id || ""}
-                    parentId={childItem.parentId}
+                    parentId={childItem.parentId ? String(childItem.parentId) : null}
                     content={childItem.text}
-                    author={childItem.author}
-                    community={childItem.community}
-                    createdAt={childItem.createdAt}
-                    comments={childItem.children} 
+                    author={{
+                        name: childItem.author?.name ?? 'Unknown user',
+                        image: childItem.author?.image ?? '/user.svg',
+                        id: childItem.author?.id ?? '',
+                    }}
+                    community={childItem.community && childItem.community.name ? {
+                        id: String(childItem.community.id ?? ''),
+                        name: childItem.community.name,
+                        image: childItem.community.image ?? '/community.svg',
+                    } : null}
+                    createdAt={childItem.createdAt?.toString() ?? new Date().toISOString()}
+                    commentCount={childItem.children?.length ?? 0} 
                     isComment
                     />
                     

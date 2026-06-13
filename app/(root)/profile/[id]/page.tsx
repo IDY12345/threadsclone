@@ -30,6 +30,11 @@ const page = async ({ params }: { params: Promise<{ id: string }> }) => {
                 username={userInfo.username}
                 imgUrl={userInfo.image}
                 bio={userInfo.bio}
+                stats={[
+                    { label: 'Posts', value: userInfo?.threads?.length ?? 0 },
+                    { label: 'Spaces', value: userInfo?.communities?.length ?? 0 },
+                    { label: 'Followers', value: 0 },
+                ]}
             />
 
             <div className='mt-9 '>
@@ -45,7 +50,7 @@ const page = async ({ params }: { params: Promise<{ id: string }> }) => {
                                 className='object-contain'
                                 />
                                 <p className='max-sm:hidden'>{tab.label}</p>
-                                {tab.label === "Threads" && (
+                                {tab.label === "Posts" && (
                                 <p className='ml-1 rounded-sm bg-light-4 px-2 py-1 !text-tiny-medium text-light-2'>
                                     {userInfo?.threads?.length}
                                 </p>

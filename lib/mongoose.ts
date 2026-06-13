@@ -11,7 +11,6 @@ interface MongooseCache {
 // invocations (and hot reloads in dev) reuse a single connection instead of
 // opening a new one per request.
 declare global {
-  // eslint-disable-next-line no-var
   var _mongooseCache: MongooseCache | undefined;
 }
 
@@ -20,7 +19,7 @@ if (!cached) {
   cached = global._mongooseCache = { conn: null, promise: null };
 }
 
-export const connecctedToDB = async () => {
+export const connectToDB = async () => {
   mongoose.set('strictQuery', true);
 
   if (!MONGODB_URL) throw new Error('MONGODB_URL environment variable is not set');

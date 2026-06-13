@@ -9,6 +9,14 @@ import { fetchCommunityDetails } from '@/lib/actions/community.actions'
 import UserCard from '@/components/cards/UserCard'
 
 export const dynamic = 'force-dynamic'
+
+interface CommunityMember {
+    id: string;
+    name: string;
+    username: string;
+    image: string;
+}
+
 const page = async ({ params }: { params: Promise<{ id: string }> }) => {
 
     const { id } = await params;
@@ -28,6 +36,10 @@ const page = async ({ params }: { params: Promise<{ id: string }> }) => {
                 imgUrl={communityDetails.image}
                 bio={communityDetails.bio}
                 type="Community"
+                stats={[
+                    { label: 'Posts', value: communityDetails?.threads?.length ?? 0 },
+                    { label: 'Members', value: communityDetails?.members?.length ?? 0 },
+                ]}
             />
 
             <div className='mt-9 '>
@@ -43,7 +55,7 @@ const page = async ({ params }: { params: Promise<{ id: string }> }) => {
                                 className='object-contain'
                                 />
                                 <p className='max-sm:hidden'>{tab.label}</p>
-                                {tab.label === "Threads" && (
+                                {tab.label === "Posts" && (
                                 <p className='ml-1 rounded-sm bg-light-4 px-2 py-1 !text-tiny-medium text-light-2'>
                                     {communityDetails?.threads?.length}
                                 </p>
@@ -60,7 +72,7 @@ const page = async ({ params }: { params: Promise<{ id: string }> }) => {
                         </TabsContent>
                         <TabsContent value="members" className='w-full text-light-1'>
                                     <section className='mt-9 flex flex-col gap-10'>
-                                        {communityDetails?.members.map((member:any)=>
+                                        {communityDetails?.members.map((member: CommunityMember)=>
                                         (
                                             <UserCard 
                                             key={member.id}

@@ -119,7 +119,7 @@ const onSubmit=async(values: z.infer<typeof UserValidation>)=> {
           control={form.control}
           name="profile_photo"
           render={({ field }) => (
-            <FormItem className='flex items-center gap-4'>
+            <FormItem className='flex flex-col items-start gap-4 sm:flex-row sm:items-center'>
               <FormLabel className='account-form_image-label'>{
                 field.value ? (
                   <Image
@@ -138,8 +138,8 @@ const onSubmit=async(values: z.infer<typeof UserValidation>)=> {
                     className='object-contain' />
                 )
               }</FormLabel>
-              <FormControl className='flex-1 text-base-semibold text-gray-200'>
-                <Input type='file' accept='image/*' placeholder='Upload a photo' className='account-form_image-input' onChange={(e) => handleImage(e, field.onChange)} />
+              <FormControl className='flex-1 w-full text-base-semibold text-gray-200'>
+                <Input type='file' accept='image/*' placeholder='Upload a photo' className='account-form_image-input w-full' onChange={(e) => handleImage(e, field.onChange)} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -192,8 +192,11 @@ const onSubmit=async(values: z.infer<typeof UserValidation>)=> {
         />
         <Button
           type="submit"
-          className='bg-primary-500'
-        >Submit</Button>
+          className='btn-primary'
+          disabled={form.formState.isSubmitting}
+        >
+          {form.formState.isSubmitting ? 'Saving...' : btnTitle}
+        </Button>
       </form>
     </Form>
   )
